@@ -1,13 +1,14 @@
 /* eslint react/no-string-refs:0 */
-import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
-import { Input, Button, Checkbox, Message } from '@alifd/next';
+import React, {Component} from 'react';
+import {Link, withRouter} from 'react-router-dom';
+import {Button, Checkbox, Input, Message} from '@alifd/next';
 import {
-  FormBinderWrapper as IceFormBinderWrapper,
   FormBinder as IceFormBinder,
+  FormBinderWrapper as IceFormBinderWrapper,
   FormError as IceFormError,
 } from '@icedesign/form-binder';
 import IceIcon from '@icedesign/foundation-symbol';
+import {signInApi} from "./webApi";
 
 @withRouter
 class UserLogin extends Component {
@@ -21,7 +22,7 @@ class UserLogin extends Component {
     super(props);
     this.state = {
       value: {
-        username: '',
+        userName: '',
         password: '',
         checkbox: false,
       },
@@ -36,14 +37,21 @@ class UserLogin extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.refs.form.validateAll((errors, values) => {
+    this.refs.form.validateAll(async (errors, values) => {
       if (errors) {
         console.log('errors', errors);
         return;
       }
-      console.log(values);
-      Message.success('登录成功');
-      this.props.history.push('/');
+
+      let data = await signInApi(values);
+      if (data && data.success) {
+        this.props.history.push('/');
+        Message.success('登录成功');
+      }else{
+        Message.error(data.message || "出错啦~");
+      }
+
+
     });
   };
 
@@ -59,7 +67,7 @@ class UserLogin extends Component {
           <div style={styles.formItems}>
             <div style={styles.formItem}>
               <IceIcon type="person" size="small" style={styles.inputIcon} />
-              <IceFormBinder name="username" required message="必填">
+              <IceFormBinder name="userName" required message="必填">
                 <Input
                   size="large"
                   maxLength={20}
@@ -67,7 +75,7 @@ class UserLogin extends Component {
                   style={styles.inputCol}
                 />
               </IceFormBinder>
-              <IceFormError name="username" />
+              <IceFormError name="userName"/>
             </div>
 
             <div style={styles.formItem}>

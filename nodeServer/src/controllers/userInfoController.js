@@ -4,6 +4,39 @@ const userCode = require('./../codes/user')
 
 
 module.exports = {
+
+
+  /**
+   * 登录操作
+   * @param  {obejct} ctx 上下文对象
+   */
+  async signIn( ctx ) {
+    let formData = ctx.request.body
+    console.log("formData===>",formData)
+    let result = {
+      success: false,
+      message: '',
+      data: null,
+      code: ''
+    }
+
+    let userResult = await userInfoService.signIn( formData )
+
+    if ( userResult ) {
+      if ( formData.userName === userResult.name ) {
+        result.success = true
+      } else {
+        result.message = userCode.FAIL_USER_NAME_OR_PASSWORD_ERROR
+        result.code = 'FAIL_USER_NAME_OR_PASSWORD_ERROR'
+      }
+    } else {
+      result.code = 'FAIL_USER_NO_EXIST',
+        result.message = userCode.FAIL_USER_NO_EXIST
+    }
+    ctx.body = result
+  },
+
+
   /**
    * 注册操作
    * @param   {obejct} ctx 上下文对象
